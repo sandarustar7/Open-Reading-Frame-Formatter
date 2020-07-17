@@ -6,7 +6,7 @@ import os
 import subprocess
 
 DELETE_TEMPORARY_FILES = True
-APPEND_INPUT_FILE = True
+APPEND_INPUT_FILE = False
 
 with open('ORFfinderstdout.txt', 'w+') as output:
     processResult = subprocess.run(['./ORFfinder', '-in', 'input.txt', '-s', '0', '-outfmt', '0'], stdout=output)
@@ -16,6 +16,7 @@ sequences = list(SeqIO.parse('ORFfinderstdout.txt', 'fasta'))
 
 for sequence in sequences:
     id = sequence.id.split(':')
+    id[0] = id[0].replace('lcl|','')
     id[1] = str(int(id[1]) + 1)
     id[2] = str(int(id[2]) + 1)
     endid = ':'.join(id)
