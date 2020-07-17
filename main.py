@@ -1,13 +1,17 @@
 #Note: This is a work in progress. I put it together in about half a day, and its not really meant to be a good view of my coding, it was just meant to get the job done.
 
-#How to use: Run ORFfinder on an input.txt file, and put its output as output.txt. This will take both of these files and put it into an outputformatted0.txt file.
-#Running it additional times will increment the number on the outputformatted file unless the files are moved elsewhere.
-
 from Bio import SeqIO
 import math
 import os
+import subprocess
 
-sequences = list(SeqIO.parse("output.txt", 'fasta'))
+DELETE_TEMPORARY_FILES = True
+APPEND_INPUT_FILE = True
+
+with open('ORFfinderstdout.txt', 'w+') as output:
+    processResult = subprocess.run(['./ORFfinder', '-in', 'input.txt', '-s', '0', '-outfmt', '0'], stdout=output)
+
+sequences = list(SeqIO.parse('ORFfinderstdout.txt', 'fasta'))
 
 
 for sequence in sequences:
@@ -16,7 +20,7 @@ for sequence in sequences:
     id[2] = str(int(id[2]) + 1)
     endid = ':'.join(id)
     sequence.id = ""
-
+ 
     isPos = True
     nt = 0
     signed = int(id[2]) - int(id[1])
@@ -38,16 +42,22 @@ for sequence in sequences:
 
 SeqIO.write(sequences, "outputformatted.txt", "fasta")
 
-filenames = ['input.txt', 'outputformatted.txt']
+filenames = ['outputformatted.txt']
 
-fileincrement = 0
+if APPEND_INPUT_FILE:
+    filenames.append('input.txt')
 
-while os.path.exists(os.getcwd() + "//" + 'finaloutput' + str(fileincrement) + '.txt'):
-    fileincrement = fileincrement + 1
+#fileincrement = 0
+#while os.path.exists(os.getcwd() + "//" + 'finaloutput' + str(fileincrement) + '.txt'):
+#    fileincrement = fileincrement + 1
 
-with open('finaloutput' + str(fileincrement) + '.txt', 'w+') as output_file:
+with open('output' + '.txt', 'w+') as output_file:
     for name in filenames:
         with open(name) as infile:
             for line in infile:
                 output_file.write(line)
             output_file.write("\n")
+
+if (DELETE_TEMPORARY_FILES):
+    os.remove('./ORFfinderstdout.txt')
+    os.remove('./outputformatted.txt')
